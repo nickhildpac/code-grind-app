@@ -6,18 +6,26 @@ export const getJudge0LanguageId = (language) => {
     "JAVA": 62,
     "JAVASCRIPT": 63
   }
-  return languageMap[language.toUpperCase()]
+  return languageMap[language];
+}
+export const getJudge0Language = (languageId) => {
+  const languageMap = {
+    71: "PYTHON",
+    62: "JAVA",
+    63: "JAVASCRIPT"
+  }
+  return languageMap[languageId];
 }
 
 export const submitBatch = async (submission) => {
-  console.log('------------------------------');
+  // console.log('------------------------------');
   // console.log(submissions);
   const sub = [{ "source_code": "const fs = require('fs');\n\n// Reading input from stdin (using fs to read all input)\nconst input = fs.readFileSync(0, 'utf-8').trim();\nconst [a,b] = input.spilt(' ').map(Number);\n\nconsole.log(a+b)", "language_id": 63, "stdin": "100 200", "expected_output": "300" }, { "source_code": "const fs = require('fs');\n\n// Reading input from stdin (using fs to read all input)\nconst input = fs.readFileSync(0, 'utf-8').trim();\nconst [a,b] = input.spilt(' ').map(Number);\n\nconsole.log(a+b)", "language_id": 63, "stdin": "10 20", "expected_output": "30" }, { "source_code": "const fs = require('fs');\n\n// Reading input from stdin (using fs to read all input)\nconst input = fs.readFileSync(0, 'utf-8').trim();\nconst [a,b] = input.spilt(' ').map(Number);\n\nconsole.log(a+b)", "language_id": 63, "stdin": "0 0", "expected_output": "0" }];
   const { data } = await axios.post(`${process.env.JUDGE0_API_URL}/submissions/batch?base64_encoded=false`, {
     submissions: submission
   });
   console.log('------------------------------');
-  console.log(data);
+  // console.log(data);
   return data;
 }
 
@@ -25,7 +33,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const pollBatchResults = async (tokens) => {
   while (true) {
-    console.log(tokens.join(','));
+    // console.log(tokens.join(','));
     const { data } = await axios.get(`${process.env.JUDGE0_API_URL}/submissions/batch`, {
       params: {
         base64_encoded: false,
@@ -33,10 +41,10 @@ export const pollBatchResults = async (tokens) => {
       }
     })
     const results = data.submissions;
-    console.log(results);
+    // console.log(results);
     const isAllDone = results.every((result) => result.status.id !== 1 && result.status.id !== 2);
     if (isAllDone) {
-      console.log(tokens);
+      console.log(results)
       return results;
     }
     await sleep(1000);
