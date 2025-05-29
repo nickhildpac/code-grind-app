@@ -1,11 +1,13 @@
 import React, { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { Code, Eye, EyeOff, Loader, Loader2, Lock, Mail } from "lucide-react";
+import { Code, Eye, EyeOff, Home, Loader, Loader2, Lock, Mail } from "lucide-react";
 import LoginPage from "./page/LoginPage";
+import Layout from "./layout/Layout";
 import SignupPage from "./page/SignupPage";
 import { Homepage } from "./page/Homepage";
 import { useAuthStore } from "./store/useAuthStore";
+import AdminRoute from "./layout/AdminRoute";
 
 function App() {
   const { authUser, checkAuth, isCheckingAuth } = useAuthStore();
@@ -26,13 +28,22 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route
-            path="/login"
-            element={!authUser ? <LoginPage /> : <Navigate to={"/"} />}
-          />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route
-            path="/"
+            index
             element={authUser ? <Homepage /> : <Navigate to={"/login"} />}
+          />
+        </Route>
+        <Route
+          path="/signup"
+          element={!authUser ? <SignupPage /> : <Navigate to={"/"} />}
+        />
+        <Route
+          path="/login"
+            element={!authUser ? <LoginPage /> : <Navigate to={"/"} />}
+        />
+        <Route element={<AdminRoute />}>
+          <Route
+            path="/add-problem"
+            element={authUser? <AddProblem />: <Navigate to="/" />}
           />
         </Route>
       </Routes>
