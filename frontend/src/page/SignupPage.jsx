@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Code, Eye, EyeOff, Loader, Loader2, Lock, Mail } from "lucide-react";
 import z from "zod";
 import { useState } from "react";
@@ -14,6 +14,7 @@ const signUpSchema = z.object({
 });
 
 const SignupPage = () => {
+  const navigate = useNavigate();
   const { isSigninUp, signup } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const {
@@ -27,6 +28,7 @@ const SignupPage = () => {
   const onSubmit = async (data) => {
     try {
       await signup(data);
+      navigate("/");
     } catch (err) {
       console.error(err);
     }

@@ -3,19 +3,21 @@ import { useAuthStore } from "../store/useAuthStore";
 import { Loader } from "lucide-react";
 
 const AdminRoute = () => {
-  const [authUser, isCheckingAuth] = useAuthStore();
+  const { authUser, isCheckingAuth } = useAuthStore();
 
   if (isCheckingAuth) {
-    return <div className="flex items-center justify-center h-screen">
-      <Loader="size-10 animate-spin" />
-    </div>
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader className="size-10 animate-spin" />
+      </div>
+    );
   }
 
   if (!authUser || authUser.role !== "ADMIN") {
     return <Navigate to="/" />;
   }
 
-  return  <Outlet />;
-}
+  return <Outlet />;
+};
 
 export default AdminRoute;

@@ -6,7 +6,11 @@ const LogoutButton = ({ children }) => {
     await logout();
   };
 
-  return <button className="btn btn-primary" onClick={onLogout}></button>;
+  return (
+    <button className="btn btn-primary" onClick={onLogout}>
+      {children}
+    </button>
+  );
 };
 
 export default LogoutButton;

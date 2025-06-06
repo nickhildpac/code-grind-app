@@ -1,5 +1,5 @@
 import { useForm, useFieldArray, Controller } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
   Plus,
@@ -10,13 +10,13 @@ import {
   BookOpen,
   CheckCircle2,
   Download,
-  TextCursor
+  TextCursor,
 } from "lucide-react";
 import Editor from "@monaco-editor/react";
 import { useState } from "react";
 import { axiosInstance } from "../lib/axios";
 import toast from "react-hot-toast";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { sampledpData, sampleStringProblem } from "../lib/sampleData";
 
 const problemSchema = z.object({
@@ -27,12 +27,12 @@ const problemSchema = z.object({
   constraints: z.string().min(1, "Constraints are required"),
   hints: z.string().optional(),
   editorial: z.string().optional(),
-  testCases: z
+  testcases: z
     .array(
       z.object({
         input: z.string().min(1, "Input is required"),
         output: z.string().min(1, "Output is required"),
-      })
+      }),
     )
     .min(1, "At least one test case is required"),
   examples: z.object({
@@ -64,7 +64,7 @@ const problemSchema = z.object({
   }),
 });
 
-export default function CreateProblemForm () {
+export default function CreateProblemForm() {
   const [sampleType, setSampleType] = useState("DP");
   const navigation = useNavigate();
   const {
@@ -72,11 +72,11 @@ export default function CreateProblemForm () {
     control,
     handleSubmit,
     reset,
-    formState: { errors }
+    formState: { errors },
   } = useForm({
     resolver: zodResolver(problemSchema),
     defaultValues: {
-      testCases: [{ input: "", output: "" }],
+      testcases: [{ input: "", output: "" }],
       tags: [""],
       examples: {
         JAVASCRIPT: { input: "", output: "", explanation: "" },
@@ -93,39 +93,51 @@ export default function CreateProblemForm () {
         PYTHON: "# Add your reference solution here",
         JAVA: "// Add your reference solution here",
       },
-    }
+    },
   });
 
   const {
     fields: testCaseFields,
     append: appendTestCase,
     remove: removeTestCase,
-    replace: replaceTestCase
+    replace: replaceTestCase,
   } = useFieldArray({
     control,
-    name: "testCases"
-  })
+    name: "testcases",
+  });
   const {
     fields: tagFields,
     append: appendTag,
     remove: removeTag,
-    replace: replaceTag
+    replace: replaceTag,
   } = useFieldArray({
     control,
-    name: "tags"
-  })
+    name: "tags",
+  });
 
   const [isLoading, setIsLoading] = useState(false);
 
   const loadSampleData = () => {
-    const sampleData = sampleType === "DP"?sampledpData: sampleStringProblem;
+    const sampleData = sampleType === "DP" ? sampledpData : sampleStringProblem;
     replaceTag(sampleData.tags.map((tag) => tag));
-    replaceTestCase(sampleData.testCases.map((tc) => tc));
+    replaceTestCase(sampleData.testcases.map((tc) => tc));
     reset(sampleData);
-  }
+  };
   const onSubmit = async (value) => {
     console.log(value);
-  }
+    try {
+      setIsLoading(true);
+      const res = await axiosInstance.post("/problems/create-problem", value);
+      toast.success(res.data.message || "Problem created successfully");
+      navigation("/");
+    } catch (error) {
+      console.error(error);
+      toast.error("Error creating problem");
+    } finally {
+      console.log(value);
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-7xl">
@@ -322,13 +334,13 @@ export default function CreateProblemForm () {
                           </label>
                           <textarea
                             className="textarea textarea-bordered min-h-24 w-full p-3 resize-y"
-                            {...register(`testCases.${index}.input`)}
+                            {...register(`testcases.${index}.input`)}
                             placeholder="Enter test case input"
                           />
-                          {errors.testCases?.[index]?.input && (
+                          {errors.testcases?.[index]?.input && (
                             <label className="label">
                               <span className="label-text-alt text-error">
-                                {errors.testCases[index].input.message}
+                                {errors.testcases[index].input.message}
                               </span>
                             </label>
                           )}
@@ -341,13 +353,13 @@ export default function CreateProblemForm () {
                           </label>
                           <textarea
                             className="textarea textarea-bordered min-h-24 w-full p-3 resize-y"
-                            {...register(`testCases.${index}.output`)}
+                            {...register(`testcases.${index}.output`)}
                             placeholder="Enter expected output"
                           />
-                          {errors.testCases?.[index]?.output && (
+                          {errors.testcases?.[index]?.output && (
                             <label className="label">
                               <span className="label-text-alt text-error">
-                                {errors.testCases[index].output.message}
+                                {errors.testcases[index].output.message}
                               </span>
                             </label>
                           )}
@@ -357,10 +369,10 @@ export default function CreateProblemForm () {
                   </div>
                 ))}
               </div>
-              {errors.testCases && !Array.isArray(errors.testCases) && (
+              {errors.testcases && !Array.isArray(errors.testcases) && (
                 <div className="mt-2">
                   <span className="text-error text-sm">
-                    {errors.testCases.message}
+                    {errors.testcases.message}
                   </span>
                 </div>
               )}
@@ -589,7 +601,6 @@ export default function CreateProblemForm () {
           </form>
         </div>
       </div>
-
     </div>
-  )
+  );
 }
