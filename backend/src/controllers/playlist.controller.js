@@ -23,7 +23,7 @@ export const getAllListDetails = asyncHandler(async (req, res) => {
 
 export const getPlaylistDetails = asyncHandler(async (req, res) => {
   const { playlistId } = req.params;
-  const playlist = await db.playlist({
+  const playlist = await db.playlist.findUnique({
     where: {
       id: playlistId,
       userId: req.user.id,
@@ -66,7 +66,7 @@ export const addProblemToPlaylist = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid or missing problems");
   }
 
-  const problemsInPlaylist = await db.problemsInPlaylist.createMany({
+  const problemsInPlaylist = await db.problemInPlaylist.createMany({
     data: problemIds.map((problemId) => ({
       playlistId,
       problemId,
@@ -100,7 +100,7 @@ export const deleteProblemFromPlaylist = asyncHandler(async (req, res) => {
   if (!Array.isArray(problemIds) || problemIds.length === 0) {
     throw new ApiError(400, "Invalid problem ids");
   }
-  const deletedProblems = await db.problemsInPlaylist.deleteMany({
+  const deletedProblems = await db.problemInPlaylist.deleteMany({
     where: {
       playlistId,
       problemId: {

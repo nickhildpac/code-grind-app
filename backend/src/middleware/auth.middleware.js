@@ -5,49 +5,49 @@ import { db } from "../libs/db.js";
 import { UserRole } from "../generated/prisma/index.js";
 
 export const authMiddleware = asyncHandler(async (req, res, next) => {
-  const token = req.cookies.jwt;
+  const token = req.cookies.access_token;
   if (!token) {
-    throw new ApiError(401, "User not authorized")
+    throw new ApiError(401, "User not authorized");
   }
   let decoded;
   try {
-    decoded = jwt.verify(token, process.env.JWT_SECRET);
+    decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
   } catch (err) {
-    throw new ApiError(401, "invalid crednetials")
+    throw new ApiError(401, "invalid crednetials");
   }
   const user = await db.user.findUnique({
     where: {
-      id: decoded.id
+      id: decoded.id,
     },
     select: {
       id: true,
       image: true,
       name: true,
       email: true,
-      role: true
-    }
+      role: true,
+    },
   });
   if (!user) {
     throw new ApiError(404, "User not found");
   }
   req.user = user;
   next();
-})
+});
 
 export const isAdmin = asyncHandler(async (req, res, next) => {
   const id = req.user.id;
   console.log(id);
   const user = await db.user.findUnique({
     where: {
-      id
+      id,
     },
     select: {
-      role: true
-    }
+      role: true,
+    },
   });
   console.log(user.role);
   if (!user || user.role !== UserRole.ADMIN) {
     throw new ApiError(403, "Access denied - Admins only");
   }
   next();
-})
+});
